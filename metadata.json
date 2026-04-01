@@ -1,0 +1,5 @@
+{
+  "name": "The Empathy Engine",
+  "description": "An advanced neural audio synthesis engine that modulates vocal characteristics based on emotional context.",
+  "requestFramePermissions": []
+}
