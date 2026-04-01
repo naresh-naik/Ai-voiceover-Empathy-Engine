@@ -1,62 +1,127 @@
-# The Empathy Engine 🎙️
+# AI Voiceover Empathy Engine 🎙️
 
-An advanced neural audio synthesis platform that dynamically modulates vocal characteristics based on the emotional context and intensity of input text.
+An emotion-aware voice synthesis platform that detects sentiment in text and generates a matching voiceover — available in two flavours:
 
-## 🌟 Overview
+| Version | Stack | API keys needed |
+|---------|-------|----------------|
+| **Python / Flask** (this guide) | Python, Flask, VADER, gTTS | ❌ None |
+| React / TypeScript | React 19, Vite, Gemini API | ✅ Gemini key |
 
-The Empathy Engine bridges the gap between robotic text-to-speech and human-like expressive communication. By analyzing the underlying sentiment of a message, the engine programmatically adjusts vocal parameters—such as pitch, rate, and tonal quality—to achieve emotional resonance.
+---
 
-## 🚀 Key Features
+## 🐍 Python / Flask Version
 
-- **Neural Emotion Analysis**: Deep sentiment detection identifying primary emotions and their relative intensity.
-- **Dynamic Vocal Modulation**: Real-time adjustment of TTS parameters based on emotional metadata.
-- **High-Fidelity Synthesis**: Utilizes state-of-the-art neural speech models for natural-sounding output.
-- **Interactive Audio Suite**: Full playback control with seeking, duration tracking, and export capabilities.
-- **Session History**: Persistent tracking of synthesized segments within the current session.
+### 🌟 Features
 
-## 🛠️ Technical Stack
+- **Sentiment Analysis** — uses [VADER](https://github.com/cjhutto/vaderSentiment) for accurate valence scoring (falls back gracefully to a built-in lexicon if VADER is not installed).
+- **Emotion Mapping** — maps compound sentiment scores to one of five emotions: *joy*, *positive*, *neutral*, *negative*, *anger*.
+- **Voice Synthesis** — generates an MP3 voiceover via [gTTS](https://github.com/pndurette/gTTS), choosing a distinct accent and speed for each emotion.
+- **Modern Dark UI** — clean, responsive single-page frontend with sample text buttons, score bars, and an inline audio player.
+- **Zero API keys** — runs entirely offline after `pip install`.
 
-- **Frontend**: React 19, TypeScript, Vite
-- **Styling**: Tailwind CSS 4.0 (Custom Neural Theme)
-- **Animations**: Framer Motion
-- **AI/ML Core**: 
-  - **Sentiment Analysis**: Gemini 3.1 Flash Lite (Optimized for low-latency detection)
-  - **Speech Synthesis**: Gemini 2.5 Flash TTS (Emotional synthesis core)
+### 🛠️ Technical Stack
 
-## 📦 Local Setup
+- **Backend**: Python 3.9+, Flask
+- **Sentiment**: vaderSentiment (optional, falls back to built-in lexicon)
+- **TTS**: gTTS (optional, audio generation disabled if absent)
+- **Frontend**: Vanilla HTML / CSS / JavaScript (served by Flask)
 
-Follow these steps to run the project on your local machine:
+### 📦 Setup
 
-### 1. Clone the Repository
+#### 1. Clone the repository
 ```bash
 git clone <your-repo-url>
-cd empathy-engine
+cd Ai-voiceover-Empathy-Engine
 ```
 
-### 2. Install Dependencies
+#### 2. Create and activate a virtual environment (recommended)
+```bash
+python -m venv .venv
+# macOS / Linux
+source .venv/bin/activate
+# Windows
+.venv\Scripts\activate
+```
+
+#### 3. Install Python dependencies
+```bash
+pip install -r requirements.txt
+```
+
+#### 4. Run the Flask application
+```bash
+python app.py
+```
+Open **http://localhost:5000** in your browser.
+
+### 🔌 API Reference
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `GET`  | `/`        | Renders the homepage |
+| `POST` | `/analyze` | Analyses text, returns emotion + optional audio URL |
+| `GET`  | `/health`  | Service status / dependency availability |
+
+#### `POST /analyze`
+
+**Request body** (JSON):
+```json
+{ "text": "Today was absolutely incredible!" }
+```
+
+**Response** (JSON):
+```json
+{
+  "success": true,
+  "emotion": "joy",
+  "emotion_description": "Joyful & Uplifting",
+  "compound_score": 0.7184,
+  "scores": { "positive": 0.545, "negative": 0.0, "neutral": 0.455 },
+  "voice_description": "Bright Australian accent — energetic and upbeat",
+  "audio_url": "/static/audio/<uuid>.mp3",
+  "vader_available": true,
+  "gtts_available": true
+}
+```
+
+### 🧪 How It Works
+
+1. **Analyse** — VADER (or the built-in lexicon) scores the text and produces *pos*, *neg*, *neu*, and *compound* values.
+2. **Map** — The compound score is mapped to an emotion: joy (≥ 0.5), positive (≥ 0.05), neutral, negative (≥ −0.5), anger (< −0.5).
+3. **Synthesise** — gTTS generates an MP3 using an accent and speed selected for the detected emotion and saves it to `static/audio/`.
+4. **Serve** — The frontend plays the audio inline via the browser's native `<audio>` element.
+
+---
+
+## ⚛️ React / TypeScript Version
+
+### 🛠️ Technical Stack
+
+- **Frontend**: React 19, TypeScript, Vite
+- **Styling**: Tailwind CSS 4.0
+- **AI/ML Core**:
+  - **Sentiment Analysis**: Gemini 3.1 Flash Lite
+  - **Speech Synthesis**: Gemini 2.5 Flash TTS
+
+### 📦 Setup
+
+#### 1. Install dependencies
 ```bash
 npm install
 ```
 
-### 3. Configure Environment Variables
-Create a `.env` file in the root directory and add your Gemini API Key:
+#### 2. Configure environment variables
+Create a `.env` file and add your Gemini API key:
 ```env
 GEMINI_API_KEY=your_api_key_here
 ```
-*Note: You can obtain an API key from the [Google AI Dashboard](https://aistudio.google.com/app/apikey).*
+*Get a key from the [Google AI Dashboard](https://aistudio.google.com/app/apikey).*
 
-### 4. Run the Development Server
+#### 3. Run the development server
 ```bash
 npm run dev
 ```
 The application will be available at `http://localhost:3000`.
-
-## 🧪 How it Works
-
-1. **Analysis Phase**: The engine sends the input text to a lightweight neural model to determine the primary emotion (e.g., "Excited", "Anxious", "Calm") and its intensity (0.0 to 1.0).
-2. **Strategy Generation**: Based on the analysis, a "Vocal Modulation Strategy" is formulated. For example, a "High Intensity Angry" result might trigger a strategy of "Speak with a sharp, loud tone and rapid pace."
-3. **Synthesis Phase**: The text, along with the modulation strategy, is sent to the neural TTS core.
-4. **PCM to WAV Conversion**: The raw 16-bit PCM data returned by the API is processed on the client side, where a RIFF/WAV header is dynamically generated to create a playable audio blob.
 
 ---
 

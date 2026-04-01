@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Voiceover Empathy Engine</title>
+  <style>
+    /* ── Base ── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #0a0e1a;
+      --surface:   #111827;
+      --border:    #1f2d45;
+      --accent:    #6366f1;
+      --accent-lt: #818cf8;
+      --text:      #e2e8f0;
+      --muted:     #64748b;
+      --joy:       #fbbf24;
+      --positive:  #34d399;
+      --neutral:   #60a5fa;
+      --negative:  #a78bfa;
+      --anger:     #f87171;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    /* ── Layout ── */
+    .container {
+      width: 100%;
+      max-width: 780px;
+      padding: 2rem 1.25rem 4rem;
+    }
+
+    /* ── Header ── */
+    header {
+      text-align: center;
+      margin-bottom: 2.5rem;
+    }
+
+    header .badge {
+      display: inline-block;
+      background: rgba(99,102,241,.15);
+      border: 1px solid rgba(99,102,241,.35);
+      color: var(--accent-lt);
+      font-size: .75rem;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      padding: .35rem .9rem;
+      border-radius: 99px;
+      margin-bottom: 1.1rem;
+    }
+
+    header h1 {
+      font-size: clamp(1.75rem, 5vw, 2.6rem);
+      font-weight: 700;
+      background: linear-gradient(135deg, #818cf8, #a78bfa, #60a5fa);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      line-height: 1.2;
+      margin-bottom: .6rem;
+    }
+
+    header p {
+      color: var(--muted);
+      font-size: .95rem;
+      max-width: 520px;
+      margin: 0 auto;
+    }
+
+    /* ── Card ── */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 1rem;
+      padding: 1.75rem;
+      margin-bottom: 1.25rem;
+    }
+
+    .card-title {
+      font-size: .8rem;
+      font-weight: 600;
+      letter-spacing: .07em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 1rem;
+    }
+
+    /* ── Samples ── */
+    .samples {
+      display: flex;
+      flex-wrap: wrap;
+      gap: .6rem;
+      margin-bottom: .5rem;
+    }
+
+    .sample-btn {
+      background: rgba(99,102,241,.1);
+      border: 1px solid rgba(99,102,241,.25);
+      color: var(--accent-lt);
+      font-size: .8rem;
+      padding: .4rem .85rem;
+      border-radius: .5rem;
+      cursor: pointer;
+      transition: background .2s, border-color .2s;
+    }
+
+    .sample-btn:hover {
+      background: rgba(99,102,241,.22);
+      border-color: var(--accent);
+    }
+
+    /* ── Textarea ── */
+    .textarea-wrap { position: relative; }
+
+    textarea {
+      width: 100%;
+      min-height: 140px;
+      background: #0d1525;
+      border: 1px solid var(--border);
+      border-radius: .75rem;
+      color: var(--text);
+      font-size: .95rem;
+      line-height: 1.6;
+      padding: 1rem;
+      resize: vertical;
+      outline: none;
+      transition: border-color .2s;
+    }
+
+    textarea:focus { border-color: var(--accent); }
+
+    .char-count {
+      position: absolute;
+      bottom: .6rem;
+      right: .9rem;
+      font-size: .73rem;
+      color: var(--muted);
+      pointer-events: none;
+    }
+
+    .char-count.warn { color: var(--anger); }
+
+    /* ── Analyze button ── */
+    .btn-analyze {
+      width: 100%;
+      margin-top: 1rem;
+      padding: .85rem;
+      background: linear-gradient(135deg, var(--accent), #7c3aed);
+      border: none;
+      border-radius: .75rem;
+      color: #fff;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity .2s, transform .1s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: .5rem;
+    }
+
+    .btn-analyze:hover:not(:disabled) { opacity: .88; }
+    .btn-analyze:active:not(:disabled) { transform: scale(.98); }
+    .btn-analyze:disabled { opacity: .45; cursor: not-allowed; }
+
+    /* ── Loading ── */
+    .loading { display: none; flex-direction: column; align-items: center; gap: .85rem; padding: 1.5rem 0; }
+    .loading.active { display: flex; }
+
+    .spinner {
+      width: 42px; height: 42px;
+      border: 3px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin .8s linear infinite;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .loading p { color: var(--muted); font-size: .9rem; }
+
+    /* ── Error ── */
+    .error-box {
+      display: none;
+      align-items: flex-start;
+      gap: .75rem;
+      background: rgba(248,113,113,.1);
+      border: 1px solid rgba(248,113,113,.3);
+      border-radius: .75rem;
+      padding: 1rem 1.2rem;
+      color: #fca5a5;
+      font-size: .9rem;
+    }
+
+    .error-box.active { display: flex; }
+
+    /* ── Result ── */
+    .result-card { display: none; }
+    .result-card.active { display: block; }
+
+    .emotion-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: .75rem;
+      margin-bottom: 1.25rem;
+    }
+
+    .emotion-pill {
+      font-size: 1rem;
+      font-weight: 700;
+      padding: .4rem 1.1rem;
+      border-radius: 99px;
+      letter-spacing: .03em;
+    }
+
+    .emotion-joy      { background: rgba(251,191,36,.15);  color: var(--joy);     border: 1px solid rgba(251,191,36,.35);  }
+    .emotion-positive { background: rgba(52,211,153,.15);  color: var(--positive);border: 1px solid rgba(52,211,153,.35);  }
+    .emotion-neutral  { background: rgba(96,165,250,.15);  color: var(--neutral); border: 1px solid rgba(96,165,250,.35);  }
+    .emotion-negative { background: rgba(167,139,250,.15); color: var(--negative);border: 1px solid rgba(167,139,250,.35); }
+    .emotion-anger    { background: rgba(248,113,113,.15); color: var(--anger);   border: 1px solid rgba(248,113,113,.35); }
+
+    .compound-score { font-size: .85rem; color: var(--muted); }
+    .compound-value { font-weight: 700; color: var(--text); }
+
+    /* ── Score bars ── */
+    .scores { display: flex; flex-direction: column; gap: .7rem; margin-bottom: 1.25rem; }
+
+    .score-row { display: grid; grid-template-columns: 80px 1fr 48px; align-items: center; gap: .75rem; }
+
+    .score-label { font-size: .8rem; color: var(--muted); text-transform: capitalize; }
+
+    .score-bar-bg {
+      height: 6px;
+      background: var(--border);
+      border-radius: 99px;
+      overflow: hidden;
+    }
+
+    .score-bar-fill {
+      height: 100%;
+      border-radius: 99px;
+      transition: width .6s ease;
+    }
+
+    .fill-pos  { background: var(--positive); }
+    .fill-neg  { background: var(--anger);    }
+    .fill-neu  { background: var(--neutral);  }
+
+    .score-val { font-size: .8rem; color: var(--text); text-align: right; }
+
+    /* ── Voice description ── */
+    .voice-desc {
+      background: rgba(99,102,241,.08);
+      border: 1px solid rgba(99,102,241,.2);
+      border-radius: .75rem;
+      padding: .9rem 1.1rem;
+      font-size: .88rem;
+      color: var(--accent-lt);
+      margin-bottom: 1.25rem;
+      display: flex;
+      align-items: center;
+      gap: .7rem;
+    }
+
+    /* ── Audio player ── */
+    .audio-section { margin-top: .5rem; }
+
+    .audio-section p {
+      font-size: .8rem;
+      color: var(--muted);
+      margin-bottom: .55rem;
+    }
+
+    audio {
+      width: 100%;
+      border-radius: .6rem;
+      accent-color: var(--accent);
+    }
+
+    .no-audio {
+      background: rgba(100,116,139,.08);
+      border: 1px solid rgba(100,116,139,.2);
+      border-radius: .75rem;
+      padding: .8rem 1rem;
+      font-size: .85rem;
+      color: var(--muted);
+    }
+
+    /* ── Footer ── */
+    footer {
+      text-align: center;
+      padding: 1.5rem;
+      font-size: .8rem;
+      color: var(--muted);
+    }
+
+    /* ── Responsive ── */
+    @media (max-width: 480px) {
+      .card { padding: 1.25rem; }
+      .score-row { grid-template-columns: 66px 1fr 40px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+
+    <!-- Header -->
+    <header>
+      <div class="badge">🎙️ AI Voiceover Empathy Engine</div>
+      <h1>Emotion-Aware Voice Synthesis</h1>
+      <p>Detect the emotion in your text and generate a matching voiceover using sentiment analysis and text-to-speech.</p>
+    </header>
+
+    <!-- Input card -->
+    <div class="card">
+      <div class="card-title">Try a sample</div>
+      <div class="samples">
+        <button class="sample-btn" data-text="Today was absolutely incredible! I landed my dream job and I'm so incredibly happy and grateful!">😄 Joy</button>
+        <button class="sample-btn" data-text="Things are going pretty well. I finished my tasks and I'm feeling good about the progress.">🙂 Positive</button>
+        <button class="sample-btn" data-text="The meeting is scheduled for 3 PM. Please review the documents beforehand.">😐 Neutral</button>
+        <button class="sample-btn" data-text="I'm really disappointed with how things turned out. It's been a tough and exhausting week.">😔 Negative</button>
+        <button class="sample-btn" data-text="This is absolutely unacceptable! I am furious and outraged by this complete failure!">😡 Anger</button>
+      </div>
+    </div>
+
+    <!-- Textarea card -->
+    <div class="card">
+      <div class="card-title">Your text</div>
+      <div class="textarea-wrap">
+        <textarea id="textInput" placeholder="Enter any text to analyse its emotion and generate a voiceover…" maxlength="5000"></textarea>
+        <span class="char-count" id="charCount">0 / 5000</span>
+      </div>
+      <button class="btn-analyze" id="analyzeBtn">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+        Analyse &amp; Generate Voiceover
+      </button>
+    </div>
+
+    <!-- Loading -->
+    <div class="loading" id="loading">
+      <div class="spinner"></div>
+      <p>Analysing emotion and generating voiceover…</p>
+    </div>
+
+    <!-- Error -->
+    <div class="error-box" id="errorBox">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      <span id="errorMsg"></span>
+    </div>
+
+    <!-- Result card -->
+    <div class="card result-card" id="resultCard">
+      <div class="card-title">Analysis result</div>
+
+      <!-- Emotion + compound score -->
+      <div class="emotion-header">
+        <span class="emotion-pill" id="emotionPill"></span>
+        <span class="compound-score">Compound score: <span class="compound-value" id="compoundVal"></span></span>
+      </div>
+
+      <!-- Positive / Negative / Neutral bars -->
+      <div class="scores">
+        <div class="score-row">
+          <span class="score-label">Positive</span>
+          <div class="score-bar-bg"><div class="score-bar-fill fill-pos" id="barPos" style="width:0%"></div></div>
+          <span class="score-val" id="valPos">0.00</span>
+        </div>
+        <div class="score-row">
+          <span class="score-label">Negative</span>
+          <div class="score-bar-bg"><div class="score-bar-fill fill-neg" id="barNeg" style="width:0%"></div></div>
+          <span class="score-val" id="valNeg">0.00</span>
+        </div>
+        <div class="score-row">
+          <span class="score-label">Neutral</span>
+          <div class="score-bar-bg"><div class="score-bar-fill fill-neu" id="barNeu" style="width:0%"></div></div>
+          <span class="score-val" id="valNeu">0.00</span>
+        </div>
+      </div>
+
+      <!-- Voice description -->
+      <div class="voice-desc" id="voiceDesc">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+        <span id="voiceDescText"></span>
+      </div>
+
+      <!-- Audio player -->
+      <div class="audio-section" id="audioSection"></div>
+    </div>
+
+  </div>
+
+  <footer>AI Voiceover Empathy Engine · Python / Flask · Free to run locally · No API keys required</footer>
+
+  <script>
+    const textInput  = document.getElementById('textInput');
+    const charCount  = document.getElementById('charCount');
+    const analyzeBtn = document.getElementById('analyzeBtn');
+    const loading    = document.getElementById('loading');
+    const errorBox   = document.getElementById('errorBox');
+    const errorMsg   = document.getElementById('errorMsg');
+    const resultCard = document.getElementById('resultCard');
+
+    // Character counter
+    textInput.addEventListener('input', () => {
+      const len = textInput.value.length;
+      charCount.textContent = `${len} / 5000`;
+      charCount.classList.toggle('warn', len > 4500);
+    });
+
+    // Sample buttons
+    document.querySelectorAll('.sample-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        textInput.value = btn.dataset.text;
+        textInput.dispatchEvent(new Event('input'));
+        textInput.focus();
+      });
+    });
+
+    // Analyze
+    analyzeBtn.addEventListener('click', async () => {
+      const text = textInput.value.trim();
+      if (!text) { showError('Please enter some text before analysing.'); return; }
+
+      setLoading(true);
+      hideError();
+      hideResult();
+
+      try {
+        const res = await fetch('/analyze', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ text }),
+        });
+
+        const data = await res.json();
+
+        if (!res.ok || !data.success) {
+          showError(data.error || 'An unexpected error occurred.');
+          return;
+        }
+
+        renderResult(data);
+      } catch (err) {
+        showError('Network error — make sure the Flask server is running.');
+      } finally {
+        setLoading(false);
+      }
+    });
+
+    // Allow Ctrl+Enter to submit
+    textInput.addEventListener('keydown', e => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') analyzeBtn.click();
+    });
+
+    // ── Helpers ──────────────────────────────────────────────────────────────
+
+    function setLoading(on) {
+      analyzeBtn.disabled = on;
+      loading.classList.toggle('active', on);
+    }
+
+    function showError(msg) {
+      errorMsg.textContent = msg;
+      errorBox.classList.add('active');
+    }
+
+    function hideError() { errorBox.classList.remove('active'); }
+    function hideResult() { resultCard.classList.remove('active'); }
+
+    function renderResult(data) {
+      const emotion = data.emotion;
+
+      // Pill
+      const pill = document.getElementById('emotionPill');
+      pill.textContent = `${emotionEmoji(emotion)} ${capitalize(data.emotion_description || emotion)}`;
+      pill.className = `emotion-pill emotion-${emotion}`;
+
+      // Compound score
+      document.getElementById('compoundVal').textContent = data.compound_score.toFixed(4);
+
+      // Score bars
+      const s = data.scores;
+      setBar('barPos', 'valPos', s.positive);
+      setBar('barNeg', 'valNeg', s.negative);
+      setBar('barNeu', 'valNeu', s.neutral);
+
+      // Voice description
+      document.getElementById('voiceDescText').textContent = data.voice_description;
+
+      // Audio
+      const audioSection = document.getElementById('audioSection');
+      if (data.audio_url) {
+        audioSection.innerHTML = `
+          <p>Generated voiceover</p>
+          <audio controls src="${data.audio_url}"></audio>
+        `;
+      } else if (!data.gtts_available) {
+        audioSection.innerHTML = `<div class="no-audio">🔇 Audio generation is disabled — install <code>gTTS</code> to enable it (<code>pip install gTTS</code>).</div>`;
+      } else {
+        audioSection.innerHTML = `<div class="no-audio">⚠️ Audio generation failed. Check server logs for details.</div>`;
+      }
+
+      resultCard.classList.add('active');
+      resultCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+
+    function setBar(barId, valId, score) {
+      document.getElementById(barId).style.width = `${(score * 100).toFixed(1)}%`;
+      document.getElementById(valId).textContent = score.toFixed(4);
+    }
+
+    function capitalize(s) { return s ? s.charAt(0).toUpperCase() + s.slice(1) : ''; }
+
+    function emotionEmoji(e) {
+      return { joy: '😄', positive: '🙂', neutral: '😐', negative: '😔', anger: '😡' }[e] || '🎙️';
+    }
+  </script>
+</body>
+</html>
