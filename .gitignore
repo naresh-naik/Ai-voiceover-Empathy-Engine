@@ -6,3 +6,18 @@ coverage/
 *.log
 .env*
 !.env.example
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.venv/
+venv/
+env/
+*.egg-info/
+dist/
+.eggs/
+
+# Generated audio files (keep the directory)
+static/audio/*.mp3
