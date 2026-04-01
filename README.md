@@ -59,7 +59,7 @@ Open **http://localhost:5000** in your browser.
 | Method | Endpoint | Description |
 |--------|----------|-------------|
 | `GET`  | `/`        | Renders the homepage |
-| `POST` | `/analyze` | Analyses text, returns emotion + optional audio URL |
+| `POST` | `/analyze` | Analyzes text, returns emotion + optional audio URL |
 | `GET`  | `/health`  | Service status / dependency availability |
 
 #### `POST /analyze`
@@ -86,7 +86,7 @@ Open **http://localhost:5000** in your browser.
 
 ### 🧪 How It Works
 
-1. **Analyse** — VADER (or the built-in lexicon) scores the text and produces *pos*, *neg*, *neu*, and *compound* values.
+1. **Analyze** — VADER (or the built-in lexicon) scores the text and produces *pos*, *neg*, *neu*, and *compound* values.
 2. **Map** — The compound score is mapped to an emotion: joy (≥ 0.5), positive (≥ 0.05), neutral, negative (≥ −0.5), anger (< −0.5).
 3. **Synthesise** — gTTS generates an MP3 using an accent and speed selected for the detected emotion and saves it to `static/audio/`.
 4. **Serve** — The frontend plays the audio inline via the browser's native `<audio>` element.
