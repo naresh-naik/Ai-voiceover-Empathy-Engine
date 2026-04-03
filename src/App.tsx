@@ -429,14 +429,11 @@ export default function App() {
               </div>
             </motion.div>
 
-            <div className="px-6 py-4 rounded-2xl bg-[#00ff9d]/5 border border-[#00ff9d]/10 flex gap-4 items-start">
-              <Zap className="w-4 h-4 text-[#00ff9d] shrink-0 mt-0.5" />
-              <div className="space-y-1">
-                <p className="text-[10px] text-[#00ff9d] font-bold uppercase tracking-widest">Challenge 1: The Empathy Engine</p>
-                <p className="text-[10px] text-[#00ff9d]/60 leading-relaxed uppercase tracking-wider">
-                  Technical submission utilizing Neural Transformers for sentiment extraction and prosody synthesis.
-                </p>
-              </div>
+            <div className="px-6 py-4 rounded-2xl bg-[#00ff9d]/5 border border-[#00ff9d]/10 flex items-center justify-center gap-3">
+              <Zap className="w-4 h-4 text-[#00ff9d]" />
+              <p className="text-xs text-[#00ff9d] font-bold uppercase tracking-[0.2em]">
+                Made by Naresh Ram IITKGP
+              </p>
             </div>
           </div>
         </div>

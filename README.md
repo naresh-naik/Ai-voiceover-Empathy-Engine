@@ -42,4 +42,4 @@ To ensure the highest quality of emotional resonance, this implementation utiliz
    ```
 
 ---
-*Developed as a technical demonstration for the DarwixAi AI Intern Assessment.*
+*Developed by **Naresh Ram IITKGP** as a technical demonstration for the DarwixAi AI Intern Assessment.*
