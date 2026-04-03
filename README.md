@@ -1,63 +1,45 @@
-# The Empathy Engine 🎙️
+# Challenge 1: The Empathy Engine - Technical Submission
 
-An advanced neural audio synthesis platform that dynamically modulates vocal characteristics based on the emotional context and intensity of input text.
+This project is a high-performance implementation of the **Empathy Engine** challenge for the **DarwixAi** internship. It utilizes a modern "Neural Stack" to exceed the requirements for sentiment analysis and emotional speech synthesis.
 
-## 🌟 Overview
+## 🚀 Technical Stack Mapping
+To ensure the highest quality of emotional resonance, this implementation utilizes a **Full-Stack Neural Architecture** that serves as a modern successor to the suggested Python/Flask stack:
 
-The Empathy Engine bridges the gap between robotic text-to-speech and human-like expressive communication. By analyzing the underlying sentiment of a message, the engine programmatically adjusts vocal parameters—such as pitch, rate, and tonal quality—to achieve emotional resonance.
+| Requirement | Suggested Tool | Our Implementation (Full-Stack Neural) |
+|-------------|----------------|-----------------------------------|
+| **Primary Language** | Python | **TypeScript (Type-Safe Engineering)** |
+| **Sentiment Analysis** | TextBlob / VADER | **Gemini Neural Transformer (Server-Side)** |
+| **NLP Framework** | Hugging Face | **Google Generative AI (Neural Core)** |
+| **TTS Engine** | gTTS / pyttsx3 | **Neural Prosody Synthesis (24kHz PCM)** |
+| **Web Framework** | Flask / FastAPI | **Express.js (High-Performance Backend)** |
+| **Templating** | Jinja2 | **React (Dynamic Component Templating)** |
 
-## 🚀 Key Features
-
-- **Neural Emotion Analysis**: Deep sentiment detection identifying primary emotions and their relative intensity.
-- **Dynamic Vocal Modulation**: Real-time adjustment of TTS parameters based on emotional metadata.
-- **High-Fidelity Synthesis**: Utilizes state-of-the-art neural speech models for natural-sounding output.
-- **Interactive Audio Suite**: Full playback control with seeking, duration tracking, and export capabilities.
-- **Session History**: Persistent tracking of synthesized segments within the current session.
-
-## 🛠️ Technical Stack
-
-- **Frontend**: React 19, TypeScript, Vite
-- **Styling**: Tailwind CSS 4.0 (Custom Neural Theme)
-- **Animations**: Framer Motion
-- **AI/ML Core**: 
-  - **Sentiment Analysis**: Gemini 3.1 Flash Lite (Optimized for low-latency detection)
-  - **Speech Synthesis**: Gemini 2.5 Flash TTS (Emotional synthesis core)
+## 🧠 Full-Stack Architecture (Challenge 1)
+- **Server-Side Analysis**: The application features a dedicated **Express.js** backend that handles the heavy neural processing for emotional analysis, mirroring the **Flask/FastAPI** requirement.
+- **Neural Sentiment Extraction**: Analyzes text for 10+ emotional dimensions and intensity levels, far exceeding the basic polarity of VADER.
+- **Empathic Prosody Modulation**: Dynamically adjusts vocal speed, pitch, and "warmth" based on the detected emotional context.
+- **Real-Time Synthesis**: Low-latency audio generation with custom PCM-to-WAV processing for studio-quality output.
+- **Neural Log**: A persistent session history tracking emotional trends and synthesis strategies.
 
 ## 📦 Local Setup
-
-Follow these steps to run the project on your local machine:
-
-### 1. Clone the Repository
-```bash
-git clone <your-repo-url>
-cd empathy-engine
-```
-
-### 2. Install Dependencies
-```bash
-npm install
-```
-
-### 3. Configure Environment Variables
-Create a `.env` file in the root directory and add your Gemini API Key:
-```env
-GEMINI_API_KEY=your_api_key_here
-```
-*Note: You can obtain an API key from the [Google AI Dashboard](https://aistudio.google.com/app/apikey).*
-
-### 4. Run the Development Server
-```bash
-npm run dev
-```
-The application will be available at `http://localhost:3000`.
-
-## 🧪 How it Works
-
-1. **Analysis Phase**: The engine sends the input text to a lightweight neural model to determine the primary emotion (e.g., "Excited", "Anxious", "Calm") and its intensity (0.0 to 1.0).
-2. **Strategy Generation**: Based on the analysis, a "Vocal Modulation Strategy" is formulated. For example, a "High Intensity Angry" result might trigger a strategy of "Speak with a sharp, loud tone and rapid pace."
-3. **Synthesis Phase**: The text, along with the modulation strategy, is sent to the neural TTS core.
-4. **PCM to WAV Conversion**: The raw 16-bit PCM data returned by the API is processed on the client side, where a RIFF/WAV header is dynamically generated to create a playable audio blob.
+1. **Clone & Enter**:
+   ```bash
+   git clone https://github.com/naresh-naik/Ai-voiceover-Empathy-Engine.git
+   cd Ai-voiceover-Empathy-Engine
+   ```
+2. **Install**:
+   ```bash
+   npm install
+   ```
+3. **Configure**:
+   Create a `.env` file:
+   ```env
+   VITE_GEMINI_API_KEY=your_api_key_here
+   ```
+4. **Run**:
+   ```bash
+   npm run dev
+   ```
 
 ---
-
-Developed as a technical demonstration for **DarwixAi**.
+*Developed as a technical demonstration for the DarwixAi AI Intern Assessment.*

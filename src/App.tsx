@@ -4,7 +4,6 @@ import {
   Play, 
   Square, 
   Volume2, 
-  Info,
   Loader2,
   History,
   Download,
@@ -430,12 +429,14 @@ export default function App() {
               </div>
             </motion.div>
 
-            {/* Technical Disclaimer */}
             <div className="px-6 py-4 rounded-2xl bg-[#00ff9d]/5 border border-[#00ff9d]/10 flex gap-4 items-start">
-              <Info className="w-4 h-4 text-[#00ff9d] shrink-0 mt-0.5" />
-              <p className="text-[10px] text-[#00ff9d]/60 leading-relaxed uppercase tracking-wider">
-                System utilizes proprietary neural architectures for real-time sentiment extraction and emotional prosody synthesis.
-              </p>
+              <Zap className="w-4 h-4 text-[#00ff9d] shrink-0 mt-0.5" />
+              <div className="space-y-1">
+                <p className="text-[10px] text-[#00ff9d] font-bold uppercase tracking-widest">Challenge 1: The Empathy Engine</p>
+                <p className="text-[10px] text-[#00ff9d]/60 leading-relaxed uppercase tracking-wider">
+                  Technical submission utilizing Neural Transformers for sentiment extraction and prosody synthesis.
+                </p>
+              </div>
             </div>
           </div>
         </div>

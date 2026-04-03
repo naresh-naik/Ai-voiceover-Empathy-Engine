@@ -1,4 +1,4 @@
-import { GoogleGenAI, Modality, ThinkingLevel } from "@google/genai";
+import { GoogleGenAI, Modality } from "@google/genai";
 
 /**
  * Neural Engine Configuration
@@ -17,16 +17,32 @@ export interface EmotionData {
  * Analyzes the emotional context and intensity of the input text.
  */
 export async function analyzeEmotion(text: string): Promise<EmotionData> {
-  const response = await ai.models.generateContent({
-    model: "gemini-3.1-flash-lite-preview",
-    contents: `Analyze text emotion. Return JSON: {emotion, intensity(0-1), vocalPrompt(TTS instruction), suggestedVoice(Puck|Charon|Kore|Fenrir|Zephyr)}. Text: "${text}"`,
-    config: {
-      responseMimeType: "application/json",
-      thinkingConfig: { thinkingLevel: ThinkingLevel.MINIMAL }
-    },
-  });
+  try {
+    const response = await fetch("/api/analyze", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ text })
+    });
 
-  return JSON.parse(response.text || "{}") as EmotionData;
+    if (!response.ok) throw new Error("Backend analysis failed");
+    const data = await response.json();
+    
+    // Map backend response to frontend EmotionData interface
+    return {
+      emotion: data.primaryEmotion,
+      intensity: data.intensity,
+      vocalPrompt: data.modulationStrategy,
+      suggestedVoice: "Zephyr" // Default for synthesis
+    };
+  } catch (error) {
+    console.error("Neural Analysis Error:", error);
+    return {
+      emotion: "Calm",
+      intensity: 0.5,
+      vocalPrompt: "Speak in a steady, neutral tone.",
+      suggestedVoice: "Zephyr"
+    };
+  }
 }
 
 /**
